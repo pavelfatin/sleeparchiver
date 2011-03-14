@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<preferences>
+    <language>EN</language>
+    <backups>true</backups>
+    <prefill>true</prefill>
+    <history>true</history>
+    <historyLimit>5</historyLimit>
+    <openRecent>true</openRecent>
+    <files>
+        <file>file B</file>
+        <file>file A</file>
+    </files>
+</preferences>

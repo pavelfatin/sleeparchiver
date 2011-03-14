@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="http://pavelfatin.com/sleeparchiver"
+           targetNamespace="http://pavelfatin.com/sleeparchiver"
+           elementFormDefault="qualified">
+
+    <xs:simpleType name="date">
+        <xs:restriction base="xs:date">
+            <xs:pattern value="\d{4}-\d{2}-\d{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="time">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="\d{2}:\d{2}"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="window">
+        <xs:restriction base="xs:integer">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="90"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="ease">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="hard"/>
+            <xs:enumeration value="normal"/>
+            <xs:enumeration value="easy"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="quality">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="bad"/>
+            <xs:enumeration value="average"/>
+            <xs:enumeration value="good"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="document">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="night" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="version" type="xs:float" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="night">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="moments" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="conditions" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="date" type="date" use="optional"/>
+            <xs:attribute name="alarm" type="time" use="optional"/>
+            <xs:attribute name="window" type="window" use="optional"/>
+            <xs:attribute name="toBed" type="time" use="optional"/>
+            <xs:attribute name="easeOfFallingAsleep" type="ease" use="optional"/>
+            <xs:attribute name="qualityOfSleep" type="quality" use="optional"/>
+            <xs:attribute name="easeOfWakingUp" type="ease" use="optional"/>
+            <xs:attribute name="alarmWorked" type="xs:boolean" use="optional"/>
+            <xs:attribute name="comments" type="xs:string" use="optional"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="moments">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="moment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="conditions">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="condition" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="moment" type="time"/>
+
+    <xs:element name="condition" type="xs:string"/>
+
+</xs:schema>

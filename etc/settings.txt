@@ -1,0 +1,1 @@
+Program uses this directory to store settings in portable mode

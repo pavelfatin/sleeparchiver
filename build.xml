@@ -1,0 +1,280 @@
+<project name="SleepArchiver" default="build-all">
+    <!--Configuration-->
+
+    <property name="product" value="SleepArchiver"/>
+    <property name="version" value="1.0.2"/>
+    <property name="description" value="Sleep data manager"/>
+    <property name="company" value="Pavel Fatin"/>
+    <property name="website" value="http://pavelfatin.com/sleeparchiver/"/>
+
+    <fileset id="libraries.production" dir="lib/">
+        <include name="AppFramework-1.03.jar"/>
+        <include name="forms-1.2.1.jar"/>
+        <include name="javacsv-2.0.jar"/>
+        <include name="RXTXcomm.jar"/>
+        <include name="swing-worker-1.2.jar"/>
+    </fileset>
+
+    <property name="class.main" value="com.pavelfatin.sleeparchiver.SleepArchiver"/>
+
+    <property name="file.windows.x86" value="${product}-v${version}-windows-x86.exe"/>
+    <property name="file.windows.x64" value="${product}-v${version}-windows-x64.exe"/>
+    <property name="file.portable" value="${product}-v${version}-portable.zip"/>
+    <property name="file.linux.x86" value="${product}-v${version}-linux-x86.zip"/>
+    <property name="file.linux.x64" value="${product}-v${version}-linux-x64.zip"/>
+    <property name="file.mac" value="${product}-v${version}-mac.zip"/>
+
+    <!--Build-->
+
+    <property name="dir.build" value="${basedir}/build"/>
+    <property name="dir.build.production" value="${dir.build}/production"/>
+    <property name="dir.build.test" value="${dir.build}/test"/>
+    <property name="dir.build.report" value="${dir.build}/report"/>
+    <property name="dir.build.lib" value="${dir.build}/lib"/>
+
+    <property name="dir.script" value="${basedir}/script"/>
+    <property name="dir.src" value="${basedir}/src"/>
+    <property name="dir.test" value="${basedir}/test"/>
+    <property name="dir.etc" value="${basedir}/etc"/>
+
+    <property name="dir.license" value="${dir.etc}/license"/>
+    <property name="dir.x86" value="${dir.etc}/x86"/>
+    <property name="dir.x64" value="${dir.etc}/x64"/>
+
+    <property name="file.jar" value="${product}.jar"/>
+    <property name="file.launcher" value="${product}.exe"/>
+
+    <path id="classpath.production">
+        <fileset refid="libraries.production"/>
+    </path>
+
+    <path id="classpath.test">
+        <path refid="classpath.production"/>
+        <pathelement location="lib/junit-4.6.jar"/>
+        <pathelement location="${dir.build.production}"/>
+    </path>
+
+    <taskdef name="nsis" classname="net.sf.nsisant.Task">
+        <classpath location="lib/nsisant-1.2.jar"/>
+    </taskdef>
+
+    <target name="build-all" depends="clean, run-tests, build-windows-x86, build-windows-x64,
+    build-portable, build-linux-x86, build-linux-x64, build-mac, schema, finalize"/>
+
+    <target name="clean">
+        <delete dir="${dir.build}"/>
+    </target>
+
+    <target name="prepare" depends="clean">
+        <mkdir dir="${dir.build}"/>
+    </target>
+
+    <target name="compile-classes" depends="prepare">
+        <mkdir dir="${dir.build.production}"/>
+        <javac classpathref="classpath.production"
+               srcdir="${dir.src}"
+               destdir="${dir.build.production}"
+               debug="false"
+               optimize="true"
+               deprecation="on"/>
+        <copy todir="${dir.build.production}">
+            <fileset dir="${dir.src}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="compile-tests" depends="compile-classes">
+        <mkdir dir="${dir.build.test}"/>
+        <javac classpathref="classpath.test"
+               srcdir="${dir.test}"
+               destdir="${dir.build.test}"
+               deprecation="on"/>
+        <copy todir="${dir.build.test}">
+            <fileset dir="${dir.test}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="run-tests" depends="compile-tests">
+        <mkdir dir="${dir.build.report}"/>
+        <junit printsummary="true" failureproperty="junit.failure">
+            <classpath refid="classpath.test"/>
+            <classpath location="${dir.build.test}"/>
+            <batchtest todir="${dir.build.report}">
+                <fileset dir="${dir.build.test}" includes="**/*Test.class"/>
+                 <formatter type="plain"/>
+            </batchtest>
+        </junit>
+        <fail if="junit.failure" message="Unit test(s) failed. Please, check reports!"/>
+    </target>
+
+    <target name="jars" depends="compile-classes">
+        <pathconvert property="manifest.classpath"
+                     pathsep=" ">
+            <path refid="classpath.production"/>
+            <chainedmapper>
+                <flattenmapper/>
+                <globmapper from="*" to="lib/*"/>
+            </chainedmapper>
+        </pathconvert>
+
+        <jar destfile="${dir.build}/${file.jar}" level="9">
+            <manifest>
+                <attribute name="Built-By" value="${company}"/>
+                <attribute name="Version" value="${version}"/>
+                <attribute name="Main-Class" value="${class.main}"/>
+                <attribute name="Class-Path" value="${manifest.classpath}"/>
+            </manifest>
+            <fileset dir="${dir.build.production}" excludes=""/>
+        </jar>
+
+        <mkdir dir="${dir.build.lib}"/>
+
+        <copy todir="${dir.build.lib}">
+            <fileset refid="libraries.production"/>
+        </copy>
+    </target>
+
+    <target name="scripts" depends="prepare">
+        <fixcrlf srcdir="${dir.etc}" destdir="${dir.build}" eol="lf" eof="remove" includes="*.sh"/>
+    </target>
+
+    <target name="schema" depends="prepare">
+        <copy file="${dir.src}/com/pavelfatin/sleeparchiver/model/document.xsd" todir="${dir.build}" />
+    </target>
+
+    <target name="build-linux-x86" depends="jars, scripts">
+        <build-linux file="${file.linux.x86}" platform="${dir.x86}"/>
+    </target>
+
+    <target name="build-linux-x64" depends="jars, scripts">
+        <build-linux file="${file.linux.x64}" platform="${dir.x64}"/>
+    </target>
+
+    <macrodef name="build-linux">
+        <attribute name="file"/>
+        <attribute name="platform"/>
+        <sequential>
+            <zip destfile="${dir.build}/@{file}" level="9">
+                <zipfileset file="${dir.build}/${file.jar}" prefix="${product}"/>
+                <zipfileset dir="${dir.etc}" prefix="${product}">
+                    <include name="Tutorial.xmz"/>
+                </zipfileset>
+                <zipfileset file="${dir.build}/installer.sh" fullpath="${product}/install.sh" filemode="755"/>
+                <zipfileset file="${dir.build}/launcher.sh" fullpath="${product}/${product}.sh" filemode="755"/>
+                <zipfileset file="${dir.etc}/readme-linux.txt" fullpath="${product}/readme.txt"/>
+                <zipfileset file="@{platform}/librxtxSerial.so" prefix="${product}"/>
+                <zipfileset dir="${dir.build.lib}" prefix="${product}/lib"/>
+                <zipfileset dir="${dir.license}" prefix="${product}/license"/>
+            </zip>
+        </sequential>
+    </macrodef>
+
+    <target name="build-portable" depends="launcher, jars">
+        <zip destfile="${dir.build}/${file.portable}" level="9">
+            <zipfileset dir="${dir.build}" prefix="${product}">
+                <include name="${file.jar}"/>
+                <include name="${file.launcher}"/>
+            </zipfileset>
+            <zipfileset dir="${dir.etc}" prefix="${product}">
+                <include name="rxtxSerial.dll"/>
+                <include name="Tutorial.xmz"/>
+            </zipfileset>
+            <zipfileset file="${dir.etc}/readme-windows.txt" fullpath="${product}/readme.txt"/>
+            <zipfileset dir="${dir.build.lib}" prefix="${product}/lib"/>
+            <zipfileset dir="${dir.license}" prefix="${product}/license"/>
+            <zipfileset file="${dir.etc}/settings.txt" prefix="${product}/settings"/>
+        </zip>
+    </target>
+
+    <target name="build-mac" depends="jars">
+        <zip destfile="${dir.build}/${file.mac}" level="9">
+            <zipfileset dir="${dir.build}" prefix="${product}">
+                <include name="${file.jar}"/>
+            </zipfileset>
+            <zipfileset dir="${dir.etc}" prefix="${product}">
+                <include name="librxtxSerial.jnilib"/>
+                <include name="Tutorial.xmz"/>
+            </zipfileset>
+            <zipfileset file="${dir.etc}/readme-mac.txt" fullpath="${product}/readme.txt"/>
+            <zipfileset file="${dir.build}/configure-serial.sh" prefix="${product}" filemode="755"/>
+            <zipfileset file="${dir.build}/launcher.sh" fullpath="${product}/${product}.sh" filemode="755"/>
+            <zipfileset dir="${dir.build.lib}" prefix="${product}/lib"/>
+            <zipfileset dir="${dir.license}" prefix="${product}/license"/>
+        </zip>
+    </target>
+
+    <target name="launcher" depends="prepare">
+        <nsis script="script/Launcher.nsi">
+            <define name="PATH_OUT" value="${dir.build}/${file.launcher}"/>
+
+            <define name="DIR_FILES" value="${dir.etc}"/>
+
+            <define name="FILE_ICON" value="compound.ico"/>
+
+            <define name="FILE_JAR" value="${file.jar}"/>
+            <define name="FILE_JAVA" value="javaw.exe"/>
+            <define name="JAVA_NUMBER" value="6.0.100"/>
+            <define name="JAVA_VERSION" value="1.6.0_10"/>
+            <define name="JAVA_URL" value="http://java.com/download/"/>
+
+            <define name="PRODUCT" value="${product}"/>
+            <define name="DESCRIPTION" value="${description}"/>
+            <define name="VERSION" value="${version}"/>
+            <define name="COMPANY" value="${company}"/>
+            <define name="FILENAME" value="${file.launcher}"/>
+        </nsis>
+    </target>
+
+    <target name="build-windows-x86" depends="launcher, jars">
+        <build-windows file="${file.windows.x86}" platform="${dir.x86}"/>
+    </target>
+
+    <target name="build-windows-x64" depends="launcher, jars">
+        <build-windows file="${file.windows.x64}" platform="${dir.x64}"/>
+    </target>
+
+    <macrodef name="build-windows">
+        <attribute name="file"/>
+        <attribute name="platform"/>
+        <sequential>
+            <nsis script="script/Installer.nsi">
+                <define name="PATH_OUT" value="${dir.build}/@{file}"/>
+
+                <define name="DIR_BUILD" value="${dir.build}"/>
+                <define name="DIR_FILES" value="${dir.etc}"/>
+                <define name="DIR_PLATFORM" value="@{platform}"/>
+                <define name="DIR_LIBS" value="${dir.build.lib}"/>
+                <define name="DIR_LICENSES" value="${dir.license}"/>
+
+                <define name="FILE_JAR" value="${file.jar}"/>
+                <define name="FILE_LAUNCHER" value="${file.launcher}"/>
+                <define name="FILE_ICON" value="compound.ico"/>
+                <define name="FILE_LICENSE" value="license.txt"/>
+
+                <define name="TITLE" value="${product} ${version}"/>
+
+                <define name="PRODUCT" value="${product}"/>
+                <define name="DESCRIPTION" value="${description}"/>
+                <define name="VERSION" value="${version}"/>
+                <define name="COMPANY" value="${company}"/>
+                <define name="WEBSITE" value="${website}"/>
+                <define name="FILENAME" value="@{file}"/>
+            </nsis>
+        </sequential>
+    </macrodef>
+
+    <target name="finalize">
+        <delete file="${dir.build}/${file.jar}"/>
+        <delete file="${dir.build}/${file.launcher}"/>
+        <delete>
+            <fileset dir="${dir.build}" includes="*.sh"/>
+        </delete>
+        <delete dir="${dir.build.production}"/>
+        <delete dir="${dir.build.test}"/>
+        <delete dir="${dir.build.report}"/>
+        <delete dir="${dir.build.lib}"/>
+    </target>
+</project>

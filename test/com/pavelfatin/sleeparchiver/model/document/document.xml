@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns="http://pavelfatin.com/sleeparchiver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://pavelfatin.com/sleeparchiver http://pavelfatin.com/files/sleeparchiver/document.xsd">
+    <night comments="Foo comment" alarmWorked="true" easeOfWakingUp="normal" qualityOfSleep="good" easeOfFallingAsleep="hard" toBed="22:15" window="30" alarm="08:45" date="2005-02-04">
+        <moments>
+            <moment>23:30</moment>
+            <moment>03:00</moment>
+            <moment>08:30</moment>
+        </moments>
+        <conditions>
+            <condition>Condition A</condition>
+            <condition>Condition B</condition>
+        </conditions>
+    </night>
+    <night easeOfWakingUp="hard" toBed="23:15" window="20" alarm="09:55" date="2006-03-05">
+        <moments>
+            <moment>23:40</moment>
+            <moment>05:00</moment>
+            <moment>09:10</moment>
+        </moments>
+        <conditions>
+            <condition>Condition D</condition>
+            <condition>Condition B</condition>
+            <condition>Condition E</condition>
+        </conditions>
+    </night>
+</document>

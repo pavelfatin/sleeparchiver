@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<document xmlns="http://pavelfatin.com/sleeparchiver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.0" xsi:schemaLocation="http://pavelfatin.com/sleeparchiver http://pavelfatin.com/files/sleeparchiver/document.xsd">
+    <night>
+        <moments>
+            <moment>malformed</moment>
+        </moments>
+    </night>
+</document>

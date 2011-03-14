@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Swing Application Framework">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/AppFramework-1.03.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$PROJECT_DIR$/lib/AppFramework-1.03-doc.zip!/AppFramework-1.03/javadoc" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$PROJECT_DIR$/lib/AppFramework-1.03-src.zip!/AppFramework-1.03/src" />
+    </SOURCES>
+  </library>
+</component>

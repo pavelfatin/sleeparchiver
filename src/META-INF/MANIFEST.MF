@@ -1,0 +1,5 @@
+Manifest-Version: 1.0
+Class-Path: lib/forms-1.2.1.jar lib/AppFramework-1.03.jar lib/swing-wo
+ rker-1.2.jar lib/RXTXcomm.jar lib/javacsv-2.0.jar
+Main-Class: com.pavelfatin.sleeparchiver.SleepArchiver
+
