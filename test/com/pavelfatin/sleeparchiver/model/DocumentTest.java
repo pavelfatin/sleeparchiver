@@ -197,7 +197,7 @@ public class DocumentTest {
     @Test
     public void exportDataToStream() throws IOException {
         String data = writeDataAsStream(_nights);
-        assertThat(data, equalTo(contentOf("data/data.csv", "\r\n")));
+        assertThat(data, equalTo(contentOf("data/data.csv", System.getProperty("line.separator"))));
     }
 
     private String writeDataAsStream(List<Night> nights) throws IOException {
